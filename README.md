@@ -282,11 +282,6 @@ link in the router's top-level redirect, before the auth check runs.
   user is starred. It is not refreshed later.
 - **Custom scheme only.** Deep links use `myapp://`. Android App Links and iOS
   Universal Links would need a verified domain.
-- **Device verification is partial.**
-  - iOS: scheme registration was checked on a simulator, where iOS showed its
-    "Open in …?" prompt for the app. Tapping through to the profile was not
-    checked on a device; the tests cover that routing.
-  - Android: built, and covered by tests, but not run on an emulator.
 - **English only.** No localization.
 
 ## Assumptions
