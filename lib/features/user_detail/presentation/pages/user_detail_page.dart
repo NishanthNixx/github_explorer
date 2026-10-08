@@ -5,6 +5,7 @@ import '../../../../core/network/app_failure.dart';
 import '../../../../core/widgets/failure_view.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../providers/user_detail_provider.dart';
+import '../widgets/share_profile_button.dart';
 import '../widgets/user_profile_view.dart';
 
 class UserDetailPage extends ConsumerWidget {
@@ -34,6 +35,7 @@ class UserDetailPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(username),
         actions: [
+          if (user != null) ShareProfileButton(user: user),
           if (user != null)
             FavoriteButton(
               id: user.id,
