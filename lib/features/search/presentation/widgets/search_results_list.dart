@@ -32,6 +32,7 @@ class SearchResultsList extends StatelessWidget {
 
     return ListView.builder(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: users.length + (footer == null ? 0 : 1),
       itemBuilder: (context, index) {
         if (index < users.length) {

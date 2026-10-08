@@ -30,6 +30,7 @@ class FavoritesPage extends ConsumerWidget {
               message: 'Tap the star on any user to save them here.',
             )
           : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: users.length,
               itemBuilder: (context, index) {
                 final user = users[index];
@@ -67,19 +68,22 @@ class _FavoriteTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = user.name;
 
-    return ListTile(
-      leading: UserAvatar(login: user.login, avatarUrl: user.avatarUrl),
-      title: Text(user.login),
-      subtitle: name == null ? null : Text(name),
-      trailing: FavoriteButton(
-        id: user.id,
-        login: user.login,
-        avatarUrl: user.avatarUrl,
-        htmlUrl: user.htmlUrl,
-        name: user.name,
+    return Card(
+      color: selected ? Theme.of(context).colorScheme.secondaryContainer : null,
+      child: ListTile(
+        leading: UserAvatar(login: user.login, avatarUrl: user.avatarUrl),
+        title: Text(user.login),
+        subtitle: name == null ? null : Text(name),
+        trailing: FavoriteButton(
+          id: user.id,
+          login: user.login,
+          avatarUrl: user.avatarUrl,
+          htmlUrl: user.htmlUrl,
+          name: user.name,
+        ),
+        selected: selected,
+        onTap: () => context.go(AppRoutes.favoriteUser(user.login)),
       ),
-      selected: selected,
-      onTap: () => context.go(AppRoutes.favoriteUser(user.login)),
     );
   }
 }

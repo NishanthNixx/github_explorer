@@ -19,14 +19,17 @@ class UserListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: UserAvatar(login: user.login, avatarUrl: user.avatarUrl),
-      title: Text(user.login),
-      trailing:
-          trailing ??
-          (onTap == null ? null : const Icon(Icons.chevron_right_rounded)),
-      selected: selected,
-      onTap: onTap,
+    return Card(
+      color: selected ? Theme.of(context).colorScheme.secondaryContainer : null,
+      child: ListTile(
+        leading: UserAvatar(login: user.login, avatarUrl: user.avatarUrl),
+        title: Text(user.login),
+        trailing:
+            trailing ??
+            (onTap == null ? null : const Icon(Icons.chevron_right_rounded)),
+        selected: selected,
+        onTap: onTap,
+      ),
     );
   }
 }
