@@ -34,6 +34,11 @@ class FailureView extends StatefulWidget {
         'Not authorized',
         'Your credentials are invalid or have expired.',
       ),
+      InvalidCredentialsFailure() => (
+        Icons.key_off_outlined,
+        'Invalid credentials',
+        'The username or password is incorrect.',
+      ),
       NotFoundFailure() => (
         Icons.person_off_outlined,
         'Not found',

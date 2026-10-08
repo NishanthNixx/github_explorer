@@ -31,7 +31,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final notifier = ref.read(searchProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('GitHub Explorer')),
+      appBar: AppBar(
+        title: const Text('GitHub Explorer'),
+        actions: [
+          IconButton(
+            tooltip: 'Account',
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => context.push(AppRoutes.account),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

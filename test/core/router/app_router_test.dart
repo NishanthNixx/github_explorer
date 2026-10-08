@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:github_explorer_starter/app.dart';
 import 'package:github_explorer_starter/core/router/app_router.dart';
+import 'package:github_explorer_starter/features/auth/data/mock_auth_server.dart';
+import 'package:github_explorer_starter/features/auth/data/token_store.dart';
 import 'package:github_explorer_starter/features/search/data/search_repository_impl.dart';
 import 'package:github_explorer_starter/features/search/presentation/pages/search_page.dart';
 import 'package:github_explorer_starter/features/search/presentation/providers/search_notifier.dart';
 import 'package:github_explorer_starter/features/user_detail/data/user_detail_repository_impl.dart';
 import 'package:github_explorer_starter/features/user_detail/presentation/pages/user_detail_page.dart';
 
+import '../../helpers/auth_test_helpers.dart';
 import '../../helpers/fake_search_repository.dart';
 import '../../helpers/fake_user_detail_repository.dart';
 
@@ -19,9 +22,14 @@ void main() {
   Future<void> pumpApp(WidgetTester tester) async {
     searchRepository = FakeSearchRepository();
     detailRepository = FakeUserDetailRepository();
+    final authServer = buildTestAuthServer();
+    final tokenStore = InMemoryTokenStore(
+      authServer.issueToken(username: MockAuthServer.demoUsername),
+    );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          ...authOverrides(server: authServer, tokenStore: tokenStore),
           searchRepositoryProvider.overrideWithValue(searchRepository),
           userDetailRepositoryProvider.overrideWithValue(detailRepository),
         ],

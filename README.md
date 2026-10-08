@@ -63,6 +63,17 @@ If `flutter create .` complains about the package name (org/bundle id), you
 can safely ignore it or rerun with `flutter create --org com.example .` —
 it won't affect the assignment.
 
+## Demo login
+
+The app is behind a mock JWT login (no real backend):
+
+- Username: `demo`
+- Password: `flutter123`
+
+Tokens expire after 5 minutes by default. To see expiry handling quickly, set
+`AUTH_TOKEN_TTL_SECONDS` (e.g. `30`) in `env.json` and run with
+`--dart-define-from-file=env.json`.
+
 ## GitHub API rate limits
 
 Unauthenticated requests are limited to **60 requests/hour** per IP. If you

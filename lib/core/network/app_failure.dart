@@ -32,6 +32,13 @@ final class UnauthorizedFailure extends AppFailure {
   String toString() => 'UnauthorizedFailure()';
 }
 
+final class InvalidCredentialsFailure extends AppFailure {
+  const InvalidCredentialsFailure();
+
+  @override
+  String toString() => 'InvalidCredentialsFailure()';
+}
+
 final class NotFoundFailure extends AppFailure {
   const NotFoundFailure();
 
