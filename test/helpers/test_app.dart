@@ -28,6 +28,7 @@ class TestApp {
     WidgetTester tester, {
     Size? screenSize,
     List<FavoriteUser> favorites = const [],
+    bool signedIn = true,
   }) async {
     if (screenSize != null) setScreenSize(tester, screenSize);
 
@@ -44,7 +45,9 @@ class TestApp {
           ...authOverrides(
             server: authServer,
             tokenStore: InMemoryTokenStore(
-              authServer.issueToken(username: MockAuthServer.demoUsername),
+              signedIn
+                  ? authServer.issueToken(username: MockAuthServer.demoUsername)
+                  : null,
             ),
           ),
           searchRepositoryProvider.overrideWithValue(app.search),

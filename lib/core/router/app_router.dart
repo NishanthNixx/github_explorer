@@ -12,6 +12,7 @@ import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/user_detail/presentation/pages/user_detail_page.dart';
 import '../layout/master_detail_layout.dart';
 import 'app_shell.dart';
+import 'deep_links.dart';
 import 'route_not_found_page.dart';
 
 abstract final class AppRoutes {
@@ -35,7 +36,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.search,
     refreshListenable: authChanges,
-    redirect: (_, state) => authRedirect(ref.read(authProvider), state.uri),
+    redirect: (_, state) =>
+        deepLinkRedirect(state.uri) ??
+        authRedirect(ref.read(authProvider), state.uri),
     routes: [
       GoRoute(path: '/', redirect: (_, _) => AppRoutes.search),
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
@@ -116,6 +119,13 @@ GoRoute _userDetailRoute() => GoRoute(
   path: 'user/:username',
   builder: (_, state) =>
       UserDetailPage(username: state.pathParameters['username']!),
+);
+
+String? deepLinkRedirect(Uri uri) => DeepLinks.toLocation(
+  uri,
+  userLocation: AppRoutes.searchUser,
+  favoritesLocation: AppRoutes.favorites,
+  fallbackLocation: AppRoutes.search,
 );
 
 @visibleForTesting

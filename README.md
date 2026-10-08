@@ -74,6 +74,20 @@ Tokens expire after 5 minutes by default. To see expiry handling quickly, set
 `AUTH_TOKEN_TTL_SECONDS` (e.g. `30`) in `env.json` and run with
 `--dart-define-from-file=env.json`.
 
+## Deep links
+
+`myapp://user/{username}` opens that user's profile (and `myapp://favorites`
+opens the favorites tab). If you are signed out, you go through login first
+and then land on the profile.
+
+```bash
+# Android emulator
+adb shell am start -a android.intent.action.VIEW -d "myapp://user/octocat"
+
+# iOS simulator
+xcrun simctl openurl booted "myapp://user/octocat"
+```
+
 ## GitHub API rate limits
 
 Unauthenticated requests are limited to **60 requests/hour** per IP. If you
