@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/network/cancellation_token.dart';
 import '../../data/search_repository_impl.dart';
+import '../../domain/github_user.dart';
 import 'search_state.dart';
 
 final searchProvider = NotifierProvider<SearchNotifier, SearchState>(
@@ -13,6 +14,7 @@ final searchProvider = NotifierProvider<SearchNotifier, SearchState>(
 
 class SearchNotifier extends Notifier<SearchState> {
   static const Duration debounceDuration = Duration(milliseconds: 400);
+  static const int perPage = 30;
 
   Timer? _debounce;
   CancellationToken? _inFlight;
@@ -58,15 +60,70 @@ class SearchNotifier extends Notifier<SearchState> {
     _search(_query);
   }
 
+  Future<void> loadMore() async {
+    final current = state;
+    if (current is! SearchSuccess ||
+        !current.hasMore ||
+        current.isLoadingMore ||
+        current.loadMoreFailure != null ||
+        current.query != _query ||
+        (_debounce?.isActive ?? false)) {
+      return;
+    }
+
+    final token = _startRequest();
+    state = current.copyWith(isLoadingMore: true);
+
+    try {
+      final result = await ref
+          .read(searchRepositoryProvider)
+          .searchUsers(
+            query: current.query,
+            page: current.page + 1,
+            perPage: perPage,
+            cancellationToken: token,
+          );
+      final latest = _latestSuccessFor(current.query, token);
+      if (latest == null) return;
+
+      state = latest.copyWith(
+        users: _appendUnique(latest.users, result.users),
+        totalCount: result.totalCount,
+        page: result.page,
+        hasMore: result.hasMore,
+        isLoadingMore: false,
+      );
+    } on RequestCancelledFailure {
+      return;
+    } on AppFailure catch (failure) {
+      final latest = _latestSuccessFor(current.query, token);
+      if (latest == null) return;
+      state = latest.copyWith(isLoadingMore: false, loadMoreFailure: failure);
+    } finally {
+      _finishRequest(token);
+    }
+  }
+
+  void retryLoadMore() {
+    final current = state;
+    if (current is! SearchSuccess || current.loadMoreFailure == null) return;
+    state = current.copyWith(clearLoadMoreFailure: true);
+    loadMore();
+  }
+
   Future<void> _search(String query) async {
-    final token = CancellationToken();
-    _inFlight = token;
+    final token = _startRequest();
     state = SearchLoading(query);
 
     try {
       final result = await ref
           .read(searchRepositoryProvider)
-          .searchUsers(query: query, page: 1, cancellationToken: token);
+          .searchUsers(
+            query: query,
+            page: 1,
+            perPage: perPage,
+            cancellationToken: token,
+          );
       if (token.isCancelled || !ref.mounted) return;
 
       state = result.isEmpty
@@ -84,8 +141,38 @@ class SearchNotifier extends Notifier<SearchState> {
       if (token.isCancelled || !ref.mounted) return;
       state = SearchError(query, failure);
     } finally {
-      if (identical(_inFlight, token)) _inFlight = null;
+      _finishRequest(token);
     }
+  }
+
+  CancellationToken _startRequest() {
+    _inFlight?.cancel();
+    final token = CancellationToken();
+    _inFlight = token;
+    return token;
+  }
+
+  void _finishRequest(CancellationToken token) {
+    if (identical(_inFlight, token)) _inFlight = null;
+  }
+
+  SearchSuccess? _latestSuccessFor(String query, CancellationToken token) {
+    if (token.isCancelled || !ref.mounted) return null;
+    final latest = state;
+    if (latest is! SearchSuccess || latest.query != query) return null;
+    return latest;
+  }
+
+  List<GithubUser> _appendUnique(
+    List<GithubUser> existing,
+    List<GithubUser> incoming,
+  ) {
+    final seen = {for (final user in existing) user.id};
+    return [
+      ...existing,
+      for (final user in incoming)
+        if (seen.add(user.id)) user,
+    ];
   }
 
   void _cancelPending() {

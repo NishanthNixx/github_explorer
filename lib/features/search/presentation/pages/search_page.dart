@@ -6,7 +6,7 @@ import '../../../../core/widgets/status_view.dart';
 import '../providers/search_notifier.dart';
 import '../providers/search_state.dart';
 import '../widgets/search_field.dart';
-import '../widgets/user_list_tile.dart';
+import '../widgets/search_results_list.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -70,10 +70,10 @@ class _SearchBody extends ConsumerWidget {
         failure: failure,
         onRetry: ref.read(searchProvider.notifier).retry,
       ),
-      SearchSuccess(:final users) => ListView.builder(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        itemCount: users.length,
-        itemBuilder: (context, index) => UserListTile(user: users[index]),
+      SearchSuccess() => SearchResultsList(
+        state: state,
+        onLoadMore: ref.read(searchProvider.notifier).loadMore,
+        onRetryLoadMore: ref.read(searchProvider.notifier).retryLoadMore,
       ),
     };
   }
