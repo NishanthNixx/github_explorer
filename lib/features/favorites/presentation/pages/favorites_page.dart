@@ -12,7 +12,9 @@ import '../providers/favorites_notifier.dart';
 import '../widgets/favorite_button.dart';
 
 class FavoritesPage extends ConsumerWidget {
-  const FavoritesPage({super.key});
+  const FavoritesPage({super.key, this.selectedLogin});
+
+  final String? selectedLogin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,7 +33,11 @@ class FavoritesPage extends ConsumerWidget {
               itemCount: users.length,
               itemBuilder: (context, index) {
                 final user = users[index];
-                return _FavoriteTile(key: ValueKey(user.id), user: user);
+                return _FavoriteTile(
+                  key: ValueKey(user.id),
+                  user: user,
+                  selected: user.login == selectedLogin,
+                );
               },
             );
     } else if (favorites.hasError && !favorites.isLoading) {
@@ -52,9 +58,10 @@ class FavoritesPage extends ConsumerWidget {
 }
 
 class _FavoriteTile extends StatelessWidget {
-  const _FavoriteTile({super.key, required this.user});
+  const _FavoriteTile({super.key, required this.user, this.selected = false});
 
   final FavoriteUser user;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +78,7 @@ class _FavoriteTile extends StatelessWidget {
         htmlUrl: user.htmlUrl,
         name: user.name,
       ),
+      selected: selected,
       onTap: () => context.go(AppRoutes.favoriteUser(user.login)),
     );
   }

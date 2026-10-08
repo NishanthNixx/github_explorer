@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +10,7 @@ import '../../features/auth/presentation/providers/auth_state.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/user_detail/presentation/pages/user_detail_page.dart';
+import '../layout/master_detail_layout.dart';
 import 'app_shell.dart';
 import 'route_not_found_page.dart';
 
@@ -45,20 +46,56 @@ final routerProvider = Provider<GoRouter>((ref) {
             AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
+            initialLocation: AppRoutes.search,
             routes: [
-              GoRoute(
-                path: AppRoutes.search,
-                builder: (_, _) => const SearchPage(),
-                routes: [_userDetailRoute()],
+              ShellRoute(
+                builder: (_, state, child) => MasterDetailLayout(
+                  master: SearchPage(
+                    selectedLogin: state.pathParameters['username'],
+                  ),
+                  detail: child,
+                ),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.search,
+                    builder: (_, _) => const MasterHome(
+                      master: SearchPage(),
+                      emptyDetail: EmptyDetailPane(
+                        title: 'Select a user',
+                        message:
+                            'Search and pick someone to see their profile here.',
+                      ),
+                    ),
+                    routes: [_userDetailRoute()],
+                  ),
+                ],
               ),
             ],
           ),
           StatefulShellBranch(
+            initialLocation: AppRoutes.favorites,
             routes: [
-              GoRoute(
-                path: AppRoutes.favorites,
-                builder: (_, _) => const FavoritesPage(),
-                routes: [_userDetailRoute()],
+              ShellRoute(
+                builder: (_, state, child) => MasterDetailLayout(
+                  master: FavoritesPage(
+                    selectedLogin: state.pathParameters['username'],
+                  ),
+                  detail: child,
+                ),
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.favorites,
+                    builder: (_, _) => const MasterHome(
+                      master: FavoritesPage(),
+                      emptyDetail: EmptyDetailPane(
+                        icon: Icons.star_border_rounded,
+                        title: 'Select a favorite',
+                        message: 'Pick a saved user to see their profile here.',
+                      ),
+                    ),
+                    routes: [_userDetailRoute()],
+                  ),
+                ],
               ),
             ],
           ),

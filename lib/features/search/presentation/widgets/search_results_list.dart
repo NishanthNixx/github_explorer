@@ -15,6 +15,7 @@ class SearchResultsList extends StatelessWidget {
     required this.onRetryLoadMore,
     this.onUserTap,
     this.trailingBuilder,
+    this.selectedLogin,
   });
 
   final SearchSuccess state;
@@ -22,6 +23,7 @@ class SearchResultsList extends StatelessWidget {
   final VoidCallback onRetryLoadMore;
   final ValueChanged<GithubUser>? onUserTap;
   final Widget Function(GithubUser user)? trailingBuilder;
+  final String? selectedLogin;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class SearchResultsList extends StatelessWidget {
             user: user,
             onTap: onUserTap == null ? null : () => onUserTap(user),
             trailing: trailingBuilder?.call(user),
+            selected: user.login == selectedLogin,
           );
         }
         return footer;

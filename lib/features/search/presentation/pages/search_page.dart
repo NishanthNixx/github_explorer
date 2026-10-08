@@ -12,14 +12,18 @@ import '../widgets/search_field.dart';
 import '../widgets/search_results_list.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({super.key, this.selectedLogin});
+
+  final String? selectedLogin;
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends ConsumerState<SearchPage> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller = TextEditingController(
+    text: ref.read(searchProvider.notifier).query,
+  );
 
   @override
   void dispose() {
@@ -52,7 +56,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               onSubmitted: notifier.submit,
             ),
           ),
-          const Expanded(child: _SearchBody()),
+          Expanded(child: _SearchBody(selectedLogin: widget.selectedLogin)),
         ],
       ),
     );
@@ -60,7 +64,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 }
 
 class _SearchBody extends ConsumerWidget {
-  const _SearchBody();
+  const _SearchBody({this.selectedLogin});
+
+  final String? selectedLogin;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,6 +90,7 @@ class _SearchBody extends ConsumerWidget {
       ),
       SearchSuccess() => SearchResultsList(
         state: state,
+        selectedLogin: selectedLogin,
         onLoadMore: ref.read(searchProvider.notifier).loadMore,
         onRetryLoadMore: ref.read(searchProvider.notifier).retryLoadMore,
         onUserTap: (user) => context.go(AppRoutes.searchUser(user.login)),

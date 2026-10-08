@@ -9,11 +9,13 @@ class UserListTile extends StatelessWidget {
     required this.user,
     this.onTap,
     this.trailing,
+    this.selected = false,
   });
 
   final GithubUser user;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class UserListTile extends StatelessWidget {
       trailing:
           trailing ??
           (onTap == null ? null : const Icon(Icons.chevron_right_rounded)),
+      selected: selected,
       onTap: onTap,
     );
   }

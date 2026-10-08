@@ -20,6 +20,8 @@ class SearchNotifier extends Notifier<SearchState> {
   CancellationToken? _inFlight;
   String _query = '';
 
+  String get query => _query;
+
   @override
   SearchState build() {
     ref.onDispose(_cancelPending);
