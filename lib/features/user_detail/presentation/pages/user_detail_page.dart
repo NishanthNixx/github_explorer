@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/app_failure.dart';
+import '../../../../core/network/connectivity_service.dart';
 import '../../../../core/widgets/failure_view.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../providers/user_detail_provider.dart';
@@ -16,6 +17,15 @@ class UserDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(userDetailProvider(username));
+    ref.listen(isOnlineProvider, (previous, next) {
+      final error = ref.read(userDetailProvider(username)).error;
+      if (previous?.value == false &&
+          next.value == true &&
+          error is AppFailure &&
+          error.isConnectivityIssue) {
+        ref.invalidate(userDetailProvider(username));
+      }
+    });
 
     final Widget body;
     if (detail.hasValue) {

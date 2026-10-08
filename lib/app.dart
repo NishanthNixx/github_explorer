@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/offline_banner.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -13,7 +14,10 @@ class App extends ConsumerWidget {
       title: 'GitHub Explorer',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       routerConfig: ref.watch(routerProvider),
+      builder: (_, child) => OfflineAware(child: child ?? const SizedBox()),
     );
   }
 }

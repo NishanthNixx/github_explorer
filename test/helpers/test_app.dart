@@ -12,23 +12,32 @@ import 'package:github_explorer_starter/features/user_detail/data/user_detail_re
 import 'package:go_router/go_router.dart';
 
 import 'auth_test_helpers.dart';
+import 'fake_connectivity_service.dart';
 import 'fake_favorites_repository.dart';
 import 'fake_search_repository.dart';
 import 'fake_user_detail_repository.dart';
 
 class TestApp {
-  TestApp._(this.tester, this.search, this.detail, this.favorites);
+  TestApp._(
+    this.tester,
+    this.search,
+    this.detail,
+    this.favorites,
+    this.connectivity,
+  );
 
   final WidgetTester tester;
   final FakeSearchRepository search;
   final FakeUserDetailRepository detail;
   final InMemoryFavoritesRepository favorites;
+  final FakeConnectivityService connectivity;
 
   static Future<TestApp> pump(
     WidgetTester tester, {
     Size? screenSize,
     List<FavoriteUser> favorites = const [],
     bool signedIn = true,
+    bool online = true,
   }) async {
     if (screenSize != null) setScreenSize(tester, screenSize);
 
@@ -37,6 +46,7 @@ class TestApp {
       FakeSearchRepository(),
       FakeUserDetailRepository(),
       InMemoryFavoritesRepository(favorites),
+      FakeConnectivityService(initiallyOnline: online),
     );
     final authServer = buildTestAuthServer();
     await tester.pumpWidget(
@@ -53,6 +63,7 @@ class TestApp {
           searchRepositoryProvider.overrideWithValue(app.search),
           userDetailRepositoryProvider.overrideWithValue(app.detail),
           favoritesOverride(app.favorites),
+          connectivityOverride(app.connectivity),
         ],
         child: const App(),
       ),

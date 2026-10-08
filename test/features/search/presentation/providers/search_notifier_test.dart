@@ -6,20 +6,26 @@ import 'package:github_explorer_starter/features/search/data/search_repository_i
 import 'package:github_explorer_starter/features/search/presentation/providers/search_notifier.dart';
 import 'package:github_explorer_starter/features/search/presentation/providers/search_state.dart';
 
+import '../../../../helpers/fake_connectivity_service.dart';
 import '../../../../helpers/fake_search_repository.dart';
 
 void main() {
   const debounce = SearchNotifier.debounceDuration;
 
   late FakeSearchRepository repository;
+  late FakeConnectivityService connectivity;
   late ProviderContainer container;
 
   void setUpContainer({bool honorCancellation = true}) {
     repository = FakeSearchRepository(honorCancellation: honorCancellation);
+    connectivity = FakeConnectivityService();
     container = ProviderContainer(
-      overrides: [searchRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        searchRepositoryProvider.overrideWithValue(repository),
+        connectivityOverride(connectivity),
+      ],
     );
-    container.read(searchProvider);
+    container.listen(searchProvider, (_, _) {});
   }
 
   SearchNotifier notifier() => container.read(searchProvider.notifier);
@@ -450,6 +456,65 @@ void main() {
         expect(success().users, hasLength(1000));
         expect(success().hasMore, isFalse);
         expect(success().isCapped, isTrue);
+        container.dispose();
+      });
+    });
+  });
+
+  group('reconnecting', () {
+    void goOfflineThenOnline(FakeAsync async) {
+      connectivity.online = false;
+      async.flushMicrotasks();
+      connectivity.online = true;
+      async.flushMicrotasks();
+    }
+
+    test('retries a search that failed because the device was offline', () {
+      fakeAsync((async) {
+        setUpContainer();
+        async.flushMicrotasks();
+        notifier().submit('octo');
+        repository.fail('octo', const NetworkFailure());
+        async.flushMicrotasks();
+
+        goOfflineThenOnline(async);
+
+        expect(repository.calls, hasLength(2));
+        expect(state(), isA<SearchLoading>());
+        container.dispose();
+      });
+    });
+
+    test('retries a failed page load after reconnecting', () {
+      fakeAsync((async) {
+        setUpContainer();
+        async.flushMicrotasks();
+        notifier().submit('octo');
+        repository.succeed('octo', count: 30, total: 100);
+        async.flushMicrotasks();
+        notifier().loadMore();
+        repository.fail('octo', const TimeoutFailure(), page: 2);
+        async.flushMicrotasks();
+
+        goOfflineThenOnline(async);
+
+        expect(repository.calls.where((c) => c.page == 2), hasLength(2));
+        container.dispose();
+      });
+    });
+
+    test('does not retry errors unrelated to connectivity', () {
+      fakeAsync((async) {
+        setUpContainer();
+        async.flushMicrotasks();
+        notifier().submit('octo');
+        repository.fail('octo', const InvalidQueryFailure());
+        async.flushMicrotasks();
+
+        goOfflineThenOnline(async);
+
+        expect(repository.calls, hasLength(1));
+        expect(state(), isA<SearchError>());
         container.dispose();
       });
     });

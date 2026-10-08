@@ -1,5 +1,8 @@
 sealed class AppFailure implements Exception {
   const AppFailure();
+
+  bool get isConnectivityIssue =>
+      this is NetworkFailure || this is TimeoutFailure;
 }
 
 final class NetworkFailure extends AppFailure {

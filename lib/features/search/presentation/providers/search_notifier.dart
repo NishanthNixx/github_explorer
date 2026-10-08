@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/network/cancellation_token.dart';
+import '../../../../core/network/connectivity_service.dart';
 import '../../data/search_repository_impl.dart';
 import '../../domain/github_user.dart';
 import 'search_state.dart';
@@ -25,6 +26,9 @@ class SearchNotifier extends Notifier<SearchState> {
   @override
   SearchState build() {
     ref.onDispose(_cancelPending);
+    ref.listen(isOnlineProvider, (previous, next) {
+      if (previous?.value == false && next.value == true) _onReconnected();
+    });
     return const SearchIdle();
   }
 
@@ -111,6 +115,16 @@ class SearchNotifier extends Notifier<SearchState> {
     if (current is! SearchSuccess || current.loadMoreFailure == null) return;
     state = current.copyWith(clearLoadMoreFailure: true);
     loadMore();
+  }
+
+  void _onReconnected() {
+    final current = state;
+    if (current is SearchError && current.failure.isConnectivityIssue) {
+      retry();
+    } else if (current is SearchSuccess &&
+        (current.loadMoreFailure?.isConnectivityIssue ?? false)) {
+      retryLoadMore();
+    }
   }
 
   Future<void> _search(String query) async {
