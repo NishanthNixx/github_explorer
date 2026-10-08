@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/failure_view.dart';
 import '../../../../core/widgets/status_view.dart';
 import '../providers/search_notifier.dart';
@@ -74,6 +76,7 @@ class _SearchBody extends ConsumerWidget {
         state: state,
         onLoadMore: ref.read(searchProvider.notifier).loadMore,
         onRetryLoadMore: ref.read(searchProvider.notifier).retryLoadMore,
+        onUserTap: (user) => context.go(AppRoutes.searchUser(user.login)),
       ),
     };
   }

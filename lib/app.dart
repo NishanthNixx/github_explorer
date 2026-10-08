@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/search/presentation/pages/search_page.dart';
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'GitHub Explorer',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const SearchPage(),
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

@@ -1,13 +1,12 @@
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:dio/dio.dart';
 
 import 'app_failure.dart';
 
-AppFailure mapDioException(
-  DioException exception, {
-  DateTime Function() now = DateTime.now,
-}) {
+AppFailure mapDioException(DioException exception, {DateTime Function()? now}) {
+  final currentTime = now ?? clock.now;
   return switch (exception.type) {
     DioExceptionType.cancel => const RequestCancelledFailure(),
     DioExceptionType.connectionTimeout ||
@@ -16,7 +15,10 @@ AppFailure mapDioException(
     DioExceptionType.transformTimeout => const TimeoutFailure(),
     DioExceptionType.connectionError => const NetworkFailure(),
     DioExceptionType.badCertificate => UnknownFailure(exception),
-    DioExceptionType.badResponse => _mapResponse(exception.response, now),
+    DioExceptionType.badResponse => _mapResponse(
+      exception.response,
+      currentTime,
+    ),
     DioExceptionType.unknown =>
       exception.error is SocketException
           ? const NetworkFailure()

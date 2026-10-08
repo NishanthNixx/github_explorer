@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/widgets/failure_view.dart';
+import '../../domain/github_user.dart';
 import '../../domain/search_result_page.dart';
 import '../providers/search_state.dart';
 import 'user_list_tile.dart';
@@ -12,11 +13,13 @@ class SearchResultsList extends StatelessWidget {
     required this.state,
     required this.onLoadMore,
     required this.onRetryLoadMore,
+    this.onUserTap,
   });
 
   final SearchSuccess state;
   final VoidCallback onLoadMore;
   final VoidCallback onRetryLoadMore;
+  final ValueChanged<GithubUser>? onUserTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,12 @@ class SearchResultsList extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index < users.length) {
           final user = users[index];
-          return UserListTile(key: ValueKey(user.id), user: user);
+          final onUserTap = this.onUserTap;
+          return UserListTile(
+            key: ValueKey(user.id),
+            user: user,
+            onTap: onUserTap == null ? null : () => onUserTap(user),
+          );
         }
         return footer;
       },

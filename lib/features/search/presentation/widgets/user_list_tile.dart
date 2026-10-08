@@ -14,6 +14,7 @@ class UserListTile extends StatelessWidget {
     return ListTile(
       leading: UserAvatar(login: user.login, avatarUrl: user.avatarUrl),
       title: Text(user.login),
+      trailing: onTap == null ? null : const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
     );
   }
