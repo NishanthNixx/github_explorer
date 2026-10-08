@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   dio: ^5.11.1
   flutter_riverpod: ^3.4.3
-  http: ^1.2.1 # used by the starter search screen until it moves to Dio
+  http: ^1.2.1
 
 dev_dependencies:
   flutter_test:

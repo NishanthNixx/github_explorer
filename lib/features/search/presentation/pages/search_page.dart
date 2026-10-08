@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 
 import '../../../../core/config/app_config.dart';
 
-// TODO(search): replace with SearchBloc + repository; this is the starter
-// screen moved as-is (still no debounce, pagination or typed models).
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
