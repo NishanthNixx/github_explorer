@@ -1,5 +1,5 @@
 name: github_explorer_starter
-description: "Starter app for the Flutter senior developer take-home assignment."
+description: "Explore GitHub users: search, profiles, favorites, mock JWT auth and deep links."
 publish_to: 'none'
 version: 0.1.0
 
