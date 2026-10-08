@@ -5,6 +5,7 @@ import 'package:github_explorer_starter/features/search/data/search_repository_i
 import 'package:github_explorer_starter/features/search/presentation/pages/search_page.dart';
 import 'package:github_explorer_starter/features/search/presentation/providers/search_notifier.dart';
 
+import '../../../../helpers/fake_favorites_repository.dart';
 import '../../../../helpers/fake_search_repository.dart';
 
 void main() {
@@ -19,7 +20,10 @@ void main() {
     final repository = FakeSearchRepository();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [searchRepositoryProvider.overrideWithValue(repository)],
+        overrides: [
+          favoritesOverride(),
+          searchRepositoryProvider.overrideWithValue(repository),
+        ],
         child: const MaterialApp(home: SearchPage()),
       ),
     );

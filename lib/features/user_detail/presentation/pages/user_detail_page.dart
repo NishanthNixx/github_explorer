@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/widgets/failure_view.dart';
+import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../providers/user_detail_provider.dart';
 import '../widgets/user_profile_view.dart';
 
@@ -28,8 +29,21 @@ class UserDetailPage extends ConsumerWidget {
       body = const Center(child: CircularProgressIndicator());
     }
 
+    final user = detail.value;
     return Scaffold(
-      appBar: AppBar(title: Text(username)),
+      appBar: AppBar(
+        title: Text(username),
+        actions: [
+          if (user != null)
+            FavoriteButton(
+              id: user.id,
+              login: user.login,
+              avatarUrl: user.avatarUrl,
+              htmlUrl: user.htmlUrl,
+              name: user.name,
+            ),
+        ],
+      ),
       body: body,
     );
   }

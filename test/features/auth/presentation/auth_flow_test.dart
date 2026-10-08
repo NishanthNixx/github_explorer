@@ -13,6 +13,7 @@ import 'package:github_explorer_starter/features/search/presentation/pages/searc
 import 'package:github_explorer_starter/features/user_detail/data/user_detail_repository_impl.dart';
 import 'package:github_explorer_starter/features/user_detail/presentation/pages/user_detail_page.dart';
 
+import '../../../helpers/fake_favorites_repository.dart';
 import '../../../helpers/auth_test_helpers.dart';
 import '../../../helpers/fake_search_repository.dart';
 import '../../../helpers/fake_user_detail_repository.dart';
@@ -41,6 +42,7 @@ void main() {
       ProviderScope(
         overrides: [
           ...authOverrides(server: server, tokenStore: tokenStore),
+          favoritesOverride(),
           searchRepositoryProvider.overrideWithValue(FakeSearchRepository()),
           userDetailRepositoryProvider.overrideWithValue(
             FakeUserDetailRepository(),

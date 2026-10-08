@@ -64,6 +64,15 @@ final class ServerFailure extends AppFailure {
   String toString() => 'ServerFailure($statusCode)';
 }
 
+final class StorageFailure extends AppFailure {
+  const StorageFailure([this.cause]);
+
+  final Object? cause;
+
+  @override
+  String toString() => 'StorageFailure($cause)';
+}
+
 final class RequestCancelledFailure extends AppFailure {
   const RequestCancelledFailure();
 

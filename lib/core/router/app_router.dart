@@ -7,8 +7,10 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/auth/presentation/providers/auth_state.dart';
+import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/user_detail/presentation/pages/user_detail_page.dart';
+import 'app_shell.dart';
 import 'route_not_found_page.dart';
 
 abstract final class AppRoutes {
@@ -16,9 +18,13 @@ abstract final class AppRoutes {
   static const String login = '/login';
   static const String splash = '/splash';
   static const String account = '/account';
+  static const String favorites = '/favorites';
 
   static String searchUser(String username) =>
       '$search/user/${Uri.encodeComponent(username)}';
+
+  static String favoriteUser(String username) =>
+      '$favorites/user/${Uri.encodeComponent(username)}';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -34,14 +40,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginPage()),
       GoRoute(path: AppRoutes.account, builder: (_, _) => const AccountPage()),
-      GoRoute(
-        path: AppRoutes.search,
-        builder: (_, _) => const SearchPage(),
-        routes: [
-          GoRoute(
-            path: 'user/:username',
-            builder: (_, state) =>
-                UserDetailPage(username: state.pathParameters['username']!),
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.search,
+                builder: (_, _) => const SearchPage(),
+                routes: [_userDetailRoute()],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.favorites,
+                builder: (_, _) => const FavoritesPage(),
+                routes: [_userDetailRoute()],
+              ),
+            ],
           ),
         ],
       ),
@@ -55,6 +74,12 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   return router;
 });
+
+GoRoute _userDetailRoute() => GoRoute(
+  path: 'user/:username',
+  builder: (_, state) =>
+      UserDetailPage(username: state.pathParameters['username']!),
+);
 
 @visibleForTesting
 String? authRedirect(AuthState auth, Uri uri) {

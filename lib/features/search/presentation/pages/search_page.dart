@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/failure_view.dart';
 import '../../../../core/widgets/status_view.dart';
+import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../providers/search_notifier.dart';
 import '../providers/search_state.dart';
 import '../widgets/search_field.dart';
@@ -86,6 +87,12 @@ class _SearchBody extends ConsumerWidget {
         onLoadMore: ref.read(searchProvider.notifier).loadMore,
         onRetryLoadMore: ref.read(searchProvider.notifier).retryLoadMore,
         onUserTap: (user) => context.go(AppRoutes.searchUser(user.login)),
+        trailingBuilder: (user) => FavoriteButton(
+          id: user.id,
+          login: user.login,
+          avatarUrl: user.avatarUrl,
+          htmlUrl: user.htmlUrl,
+        ),
       ),
     };
   }

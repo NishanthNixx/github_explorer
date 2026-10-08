@@ -14,12 +14,14 @@ class SearchResultsList extends StatelessWidget {
     required this.onLoadMore,
     required this.onRetryLoadMore,
     this.onUserTap,
+    this.trailingBuilder,
   });
 
   final SearchSuccess state;
   final VoidCallback onLoadMore;
   final VoidCallback onRetryLoadMore;
   final ValueChanged<GithubUser>? onUserTap;
+  final Widget Function(GithubUser user)? trailingBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class SearchResultsList extends StatelessWidget {
             key: ValueKey(user.id),
             user: user,
             onTap: onUserTap == null ? null : () => onUserTap(user),
+            trailing: trailingBuilder?.call(user),
           );
         }
         return footer;

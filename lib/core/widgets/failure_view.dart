@@ -56,6 +56,11 @@ class FailureView extends StatefulWidget {
             ? 'Please try again later.'
             : 'The server responded with status $statusCode. Please try again later.',
       ),
+      StorageFailure() => (
+        Icons.sd_card_alert_outlined,
+        'Storage problem',
+        "Couldn't read or save data on this device.",
+      ),
       RequestCancelledFailure() => (
         Icons.cancel_outlined,
         'Request cancelled',
