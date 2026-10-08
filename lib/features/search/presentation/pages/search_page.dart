@@ -1,69 +1,22 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/config/app_config.dart';
+import '../../../../core/widgets/failure_view.dart';
+import '../../../../core/widgets/status_view.dart';
+import '../providers/search_notifier.dart';
+import '../providers/search_state.dart';
+import '../widgets/search_field.dart';
+import '../widgets/user_list_tile.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends ConsumerState<SearchPage> {
   final TextEditingController _controller = TextEditingController();
-  List<dynamic> _results = [];
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  Future<void> _search(String query) async {
-    if (query.trim().isEmpty) {
-      setState(() {
-        _results = [];
-        _errorMessage = null;
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final uri = Uri.parse(
-        '${AppConfig.githubApiBaseUrl}/search/users'
-        '?q=${Uri.encodeQueryComponent(query)}',
-      );
-      final response = await http.get(
-        uri,
-        headers: {
-          if (AppConfig.hasGithubToken)
-            'Authorization': 'Bearer ${AppConfig.githubToken}',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _results = data['items'] ?? [];
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Request failed with status ${response.statusCode}';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Something went wrong: $e';
-        _isLoading = false;
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -73,41 +26,55 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final notifier = ref.read(searchProvider.notifier);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('GitHub User Search')),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            TextField(
+      appBar: AppBar(title: const Text('GitHub Explorer')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: SearchField(
               controller: _controller,
-              decoration: const InputDecoration(
-                hintText: 'Search GitHub usernames...',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: _search,
+              onChanged: notifier.onQueryChanged,
+              onSubmitted: notifier.submit,
             ),
-            const SizedBox(height: 12),
-            if (_isLoading) const CircularProgressIndicator(),
-            if (_errorMessage != null)
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _results.length,
-                itemBuilder: (context, index) {
-                  final user = _results[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(user['avatar_url']),
-                    ),
-                    title: Text(user['login']),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+          const Expanded(child: _SearchBody()),
+        ],
       ),
     );
+  }
+}
+
+class _SearchBody extends ConsumerWidget {
+  const _SearchBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(searchProvider);
+
+    return switch (state) {
+      SearchIdle() => const StatusView(
+        icon: Icons.person_search_rounded,
+        title: 'Search GitHub users',
+        message: 'Start typing a username to see matching profiles.',
+      ),
+      SearchLoading() => const Center(child: CircularProgressIndicator()),
+      SearchEmpty(:final query) => StatusView(
+        icon: Icons.search_off_rounded,
+        title: 'No users found',
+        message: 'No GitHub users match "$query".',
+      ),
+      SearchError(:final failure) => FailureView(
+        failure: failure,
+        onRetry: ref.read(searchProvider.notifier).retry,
+      ),
+      SearchSuccess(:final users) => ListView.builder(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        itemCount: users.length,
+        itemBuilder: (context, index) => UserListTile(user: users[index]),
+      ),
+    };
   }
 }
