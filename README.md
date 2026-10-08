@@ -5,8 +5,37 @@ It is intentionally minimal and unpolished — see `lib/main.dart` for notes on
 exactly what's missing and what you're expected to build.
 
 ## Requirements
-- Flutter SDK 3.3+ (any recent stable channel is fine)
-- Dart 3.3+
+- A Flutter stable release that ships Dart 3.12+ (required by Riverpod 3)
+- Developed on Flutter 3.47.0 / Dart 3.13.0
+
+## Project structure
+
+Feature-first, with each feature split into layers:
+
+```
+lib/
+  main.dart            # entry point, runApp only
+  app.dart             # MaterialApp / app-wide wiring
+  core/                # shared, feature-agnostic code
+    config/            # compile-time config (dart-define)
+    network/           # Dio client, interceptors, failure types
+    providers/         # app-wide Riverpod providers (Dio, storage, ...)
+    router/            # route table, guards
+    theme/             # ThemeData
+    widgets/           # reusable widgets
+  features/
+    search/            # user search + pagination
+    user_detail/       # GET /users/{username}
+    auth/              # mock JWT login
+    favorites/         # locally persisted favorites
+      data/            # API/DB sources, DTOs, repository implementations
+      domain/          # entities, repository interfaces (pure Dart, no Flutter)
+      presentation/    # providers (Riverpod notifiers), pages, widgets
+test/                  # mirrors lib/
+```
+
+Dependencies point inward: `presentation → domain ← data`. Widgets never call
+HTTP or the database directly.
 
 ## Setup
 
@@ -43,12 +72,15 @@ things you're asked to fix), you can raise the limit to 5,000/hour:
 1. Generate a personal access token at https://github.com/settings/tokens
    (no scopes/permissions need to be checked — a basic token is enough for
    read-only public endpoints).
-2. Pass it as a header on your requests:
-   ```dart
-   headers: {'Authorization': 'token YOUR_TOKEN_HERE'}
+2. Copy `env.example.json` to `env.json` (gitignored) and put the token in it.
+3. Run with:
+   ```bash
+   flutter run --dart-define-from-file=env.json
    ```
-3. **Do not commit this token.** Add it to a gitignored file or pass it via
-   `--dart-define` if you want to be tidy about it.
+   The app reads it via `AppConfig.githubToken` and sends it as a Bearer token.
+
+Note: the **search** endpoint has its own stricter limit — 10 requests/minute
+unauthenticated, 30/minute with a token.
 
 ## Relevant endpoints for this assignment
 

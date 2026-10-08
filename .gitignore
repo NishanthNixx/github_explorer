@@ -69,3 +69,12 @@ ios/Runner/GeneratedPluginRegistrant.*
 # Do not commit personal access tokens
 *.token
 secrets.dart
+
+# Local env config (GitHub token via --dart-define-from-file)
+env.json
+
+# AI assistant / editor tooling
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
